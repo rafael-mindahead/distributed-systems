@@ -11,7 +11,7 @@
   --line-soft: #1d242c;
   --text: #eef3f1;
   --muted: #929fa8;
-  --faint: #697782;
+  --faint: #82909b;
   --mint: #b4f1cd;
   --mint-strong: #8ce4b0;
   --mint-dim: #6dbe95;
@@ -98,7 +98,7 @@ h1 span { color: var(--mint); }
 .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .metric { background: var(--surface); border: 1px solid var(--line); border-radius: var(--round); padding: 23px 23px 21px; min-height: 170px; position: relative; overflow: hidden; }
 .metric-head { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; font-size: 12px; font-weight: 600; color: var(--muted); }
-.metric-index { font: 500 11px var(--font-display); color: #5a666e; }
+.metric-index { font: 500 11px var(--font-display); color: var(--faint); }
 .metric-value { margin: 19px 0 11px; font-family: var(--font-display); font-size: clamp(27px, 3vw, 40px); line-height: 1; letter-spacing: -1.3px; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .metric-currency { color: var(--mint); font-size: clamp(25px, 2.4vw, 33px); letter-spacing: -1px; white-space: nowrap; }
 .metric-desc { margin: 0; color: var(--faint); font-size: 11px; }
