@@ -11,7 +11,7 @@ Uma sala de controle técnica, calma e precisa. A interface é uma ferramenta de
 - Divisória: `#242c35`
 - Texto principal: `#eef3f1`
 - Texto secundário: `#929fa8`
-- Texto discreto: `#697782`
+- Texto discreto: `#82909b`
 - Sinal positivo e ação principal: `#b4f1cd`
 - Aviso: `#f1be81`
 - Erro: `#f39797`
