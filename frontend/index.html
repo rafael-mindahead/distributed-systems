@@ -1,408 +1,202 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Monitor Distribuído | Go + PHP + SQLite</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        body {
-            background-color: #09090b;
-            color: #f4f4f5;
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 24px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #27272a;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-
-        .badge {
-            background: #820AD1;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .card {
-            background: #18181b;
-            border: 1px solid #27272a;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .card h3 {
-            margin: 0 0 8px 0;
-            font-size: 0.85rem;
-            color: #a1a1aa;
-            text-transform: uppercase;
-        }
-
-        .card p {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #A855F7;
-        }
-
-        .grid-main {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .panel {
-            background: #18181b;
-            border: 1px solid #27272a;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        input,
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #3f3f46;
-            background: #09090b;
-            color: white;
-            box-sizing: border-box;
-        }
-
-        button {
-            background: #820AD1;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #A855F7;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-            font-size: 0.85rem;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #27272a;
-        }
-
-        .btn-del {
-            background: #dc2626;
-            padding: 4px 8px;
-            width: auto;
-            margin: 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0e12">
+  <meta name="description" content="Console de observabilidade do laboratório de sistemas distribuídos com Go, PHP e SQLite WAL.">
+  <title>Distributed Lab — Console de Observabilidade</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
 </head>
-
 <body>
-    <div class="header">
-        <div>
-            <h1 style="margin: 0;">
-                Monitor de Concorrência Distribuída
-            </h1>
+  <a class="skip-link" href="#main">Ir para o conteúdo</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-defs" aria-hidden="true">
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16v-5m5 5V6m5 10v-8"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Zm-9 5v10l9 5 9-5V7M12 12v10"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5L4 8M4 4v4h4M4 13a8 8 0 0 0 14 5l2-2m0 4v-4h-4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v7m4-7v7M6 7l1 14h10l1-14M9 7V4h6v3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/><path d="M7 7h.01M7 17h.01M11 7h6m-6 10h6"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4 1-4-2-6-2m12 4v-3.1c0-.9.3-1.6.9-2.1 3.1-.4 6.1-1.5 6.1-6.7A5.2 5.2 0 0 0 20.6 5 4.7 4.7 0 0 0 20.5 1S18.7 1 17 2.5a15 15 0 0 0-10 0C5.3 1 3.5 1 3.5 1A4.7 4.7 0 0 0 3.4 5 5.2 5.2 0 0 0 2 8.1c0 5.2 3 6.3 6.1 6.7.6.5.9 1.2.9 2.1V21"/></symbol>
+  </svg>
 
-            <small style="color: #a1a1aa;">
-                Ingestão: Go (:8080) |
-                Gateway/CRUD: PHP (:8000) |
-                Banco: SQLite WAL
-            </small>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <a class="brand" href="#overview" aria-label="Distributed Lab — visão geral">
+        <span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span class="brand-copy"><strong>distributed<span class="brand-accent">.</span></strong><small>systems lab</small></span>
+      </a>
+
+      <div class="sidebar-group">
+        <p class="nav-caption">WORKSPACE</p>
+        <nav class="side-nav" aria-label="Seções do painel">
+          <a class="nav-item is-active" href="#overview" aria-current="page"><svg><use href="#i-chart"/></svg><span>Visão geral</span></a>
+          <a class="nav-item" href="#traffic"><svg><use href="#i-activity"/></svg><span>Tráfego</span></a>
+          <a class="nav-item" href="#architecture"><svg><use href="#i-layers"/></svg><span>Arquitetura</span></a>
+          <a class="nav-item" href="#catalog"><svg><use href="#i-box"/></svg><span>Catálogo</span></a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="environment">
+          <div class="environment-heading"><span class="environment-mark"></span> AMBIENTE LOCAL</div>
+          <p>Go <span>8080</span></p>
+          <p>PHP <span>8000</span></p>
+          <p>SQLite <span>WAL</span></p>
         </div>
+        <a class="github-link" href="https://github.com/rafael-mindahead/distributed-systems" target="_blank" rel="noopener noreferrer"><svg><use href="#i-github"/></svg> Repositório <span aria-hidden="true">↗</span></a>
+      </div>
+    </aside>
 
-        <span class="badge">
-            ● Atualização Real-Time (2s)
-        </span>
-    </div>
-
-    <div class="cards">
-        <div class="card">
-            <h3>Total de Vendas Processadas</h3>
-            <p id="totalVendas">0</p>
+    <main class="main" id="main">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Lab</span><span class="breadcrumb-divider">/</span><strong>Observabilidade</strong></div>
+        <div class="topbar-actions">
+          <span class="sync-time" id="lastSync">Aguardando primeira leitura</span>
+          <button id="refreshBtn" class="button button-ghost" type="button" title="Atualizar métricas agora"><svg><use href="#i-refresh"/></svg><span>Atualizar</span></button>
         </div>
+      </header>
 
-        <div class="card">
-            <h3>Receita Acumulada</h3>
-            <p id="receitaTotal">R$ 0,00</p>
-        </div>
+      <div class="content">
+        <section class="page-intro" id="overview" aria-labelledby="pageTitle">
+          <div class="intro-main">
+            <p class="eyebrow">PAINEL DE OPERAÇÕES <span class="eyebrow-separator">/</span> 01</p>
+            <h1 id="pageTitle">O sistema, <span>em perspectiva.</span></h1>
+            <p class="lead">Acompanhe vendas, processamento e integridade do fluxo distribuído em um único lugar.</p>
+          </div>
+          <div class="health-card" id="healthCard" role="status" aria-live="polite">
+            <div class="health-heading"><span class="status-dot" id="healthDot"></span><span id="healthValue">Verificando conexões</span></div>
+            <p id="healthText">Consultando os serviços locais</p>
+            <span class="health-frequency"><svg><use href="#i-refresh"/></svg> Atualização a cada 2 segundos</span>
+          </div>
+        </section>
 
-        <div class="card">
-            <h3>Status Motor Go (OK / Falhas)</h3>
-            <p id="goStats">0 / 0</p>
-        </div>
-    </div>
+        <section class="metric-grid" aria-label="Indicadores principais">
+          <article class="metric">
+            <div class="metric-head"><span>Vendas registradas</span><span class="metric-index">01</span></div>
+            <div class="metric-value" id="totalSales" aria-live="off">—</div>
+            <p class="metric-desc">Total persistido no SQLite</p>
+            <svg class="metric-icon"><use href="#i-box"/></svg>
+          </article>
+          <article class="metric">
+            <div class="metric-head"><span>Receita acumulada</span><span class="metric-index">02</span></div>
+            <div class="metric-value metric-currency" id="totalRevenue">—</div>
+            <p class="metric-desc">Valor de todas as vendas</p>
+            <svg class="metric-icon"><use href="#i-chart"/></svg>
+          </article>
+          <article class="metric">
+            <div class="metric-head"><span>Processadas pelo Go</span><span class="metric-index">03</span></div>
+            <div class="metric-value" id="goSuccess">—</div>
+            <p class="metric-desc"><span class="mini-dot success"></span> Sucessos desde o início do Go</p>
+            <svg class="metric-icon"><use href="#i-check"/></svg>
+          </article>
+          <article class="metric">
+            <div class="metric-head"><span>Falhas no Go</span><span class="metric-index">04</span></div>
+            <div class="metric-value" id="goErrors">—</div>
+            <p class="metric-desc"><span class="mini-dot warning"></span> Erros desde o início do Go</p>
+            <svg class="metric-icon"><use href="#i-activity"/></svg>
+          </article>
+        </section>
 
-    <div class="grid-main">
-        <div class="panel">
-            <h3 style="margin-top: 0;">
-                Volume de Unidades Vendidas por Produto
-            </h3>
-
-            <canvas id="vendasChart" height="140"></canvas>
-        </div>
-
-        <div class="panel">
-            <h3 style="margin-top: 0;">
-                Cadastrar Produto (PHP CRUD)
-            </h3>
-
-            <form id="formProduto">
-                <input
-                    type="text"
-                    id="nome"
-                    placeholder="Nome do Produto"
-                    required
-                >
-
-                <input
-                    type="number"
-                    step="0.01"
-                    id="preco"
-                    placeholder="Preço (ex: 199.90)"
-                    required
-                >
-
-                <input
-                    type="number"
-                    id="estoque"
-                    placeholder="Estoque Inicial"
-                    value="10000"
-                    required
-                >
-
-                <button type="submit">
-                    Adicionar ao Catálogo
-                </button>
-            </form>
-
-            <div style="max-height: 220px; overflow-y: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Produto</th>
-                            <th>Estoque</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="listaProdutos"></tbody>
-                </table>
+        <section class="charts-grid" id="traffic" aria-label="Análise operacional">
+          <article class="panel traffic-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">PROCESSAMENTO</p><h2>Atividade de requisições</h2><p class="panel-description">Variação dos contadores Go a cada consulta</p></div>
+              <div class="legend" aria-label="Legenda"><span><i class="legend-dot success"></i> Sucessos</span><span><i class="legend-dot warning"></i> Falhas</span></div>
             </div>
-        </div>
-    </div>
+            <div class="activity-plot" aria-label="Histórico de requisições da sessão atual">
+              <div class="plot-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <div id="activityBars" class="activity-bars" role="img" aria-label="Nenhuma amostra de atividade ainda"></div>
+              <div id="activityEmpty" class="activity-empty">Aguardando amostras de atividade…</div>
+            </div>
+            <div class="plot-footer"><span>Histórico desta aba · últimas 24 leituras</span><strong id="sampleRate">— req/s <small>na última leitura</small></strong></div>
+          </article>
 
-    <script>
-        const PHP_API = 'http://localhost:8000';
-        const GO_API = 'http://localhost:8080/api/v1';
+          <article class="panel ranking-panel">
+            <div class="panel-head"><div><p class="eyebrow">PRODUTOS</p><h2>Mais vendidos</h2><p class="panel-description">Unidades acumuladas por produto</p></div></div>
+            <div id="rankingList" class="ranking-list" aria-live="off"><p class="empty-small">Carregando produtos…</p></div>
+            <div class="ranking-footer">Dados do endpoint PHP <code>/dashboard</code></div>
+          </article>
+        </section>
 
-        const ctx = document
-            .getElementById('vendasChart')
-            .getContext('2d');
+        <section class="architecture-section" id="architecture" aria-labelledby="architectureTitle">
+          <div class="section-heading">
+            <div><p class="eyebrow">TOPOLOGIA</p><h2 id="architectureTitle">Três componentes. Um fluxo.</h2></div>
+            <span class="section-note">Arquitetura local · leitura em tempo real das APIs</span>
+          </div>
+          <div class="architecture-grid">
+            <article class="service-card">
+              <div class="service-top"><span class="service-icon go-icon"><svg><use href="#i-server"/></svg></span><span class="connection" id="goConnection"><span class="status-dot"></span> Verificando</span></div>
+              <h3>Motor de ingestão <span>Go</span></h3>
+              <p>Processa vendas concorrentes e contabiliza sucessos e erros.</p>
+              <div class="service-endpoint"><code>:8080/api/v1/stats</code><span>HTTP GET</span></div>
+            </article>
+            <article class="service-card database-card">
+              <div class="service-top"><span class="service-icon db-icon"><svg><use href="#i-database"/></svg></span><span class="connection neutral"><span class="status-dot"></span> Persistência compartilhada</span></div>
+              <h3>Banco de dados <span>SQLite</span></h3>
+              <p>Armazena produtos e vendas. O modo WAL permite leituras durante escritas.</p>
+              <div class="service-endpoint"><code>data/sistema.db</code><span>WAL</span></div>
+            </article>
+            <article class="service-card">
+              <div class="service-top"><span class="service-icon php-icon"><svg><use href="#i-layers"/></svg></span><span class="connection" id="phpConnection"><span class="status-dot"></span> Verificando</span></div>
+              <h3>API de consulta <span>PHP</span></h3>
+              <p>Consulta métricas e gerencia o catálogo com operações REST.</p>
+              <div class="service-endpoint"><code>:8000/dashboard</code><span>HTTP GET</span></div>
+            </article>
+          </div>
+          <p class="architecture-note"><svg><use href="#i-activity"/></svg> O monitor consulta Go e PHP diretamente. Ambos acessam o mesmo SQLite; a tela não mede a saúde interna do banco.</p>
+        </section>
 
-        const chart = new Chart(ctx, {
-            type: 'bar',
+        <section class="catalog-section" id="catalog" aria-labelledby="catalogTitle">
+          <div class="section-heading">
+            <div><p class="eyebrow">GESTÃO</p><h2 id="catalogTitle">Catálogo de produtos</h2></div>
+            <span class="section-note">Criar e remover via API PHP</span>
+          </div>
+          <div class="catalog-grid">
+            <article class="panel catalog-table-panel">
+              <div class="catalog-toolbar"><div><h3>Produtos cadastrados</h3><p id="productCount">Carregando catálogo…</p></div><label class="search-field"><svg><use href="#i-search"/></svg><span class="sr-only">Buscar produto</span><input type="search" id="searchProduct" placeholder="Buscar produto" autocomplete="off"></label></div>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th scope="col">Produto</th><th scope="col">Preço</th><th scope="col">Estoque</th><th scope="col"><span class="sr-only">Ações</span></th></tr></thead>
+                  <tbody id="productTable"><tr><td colspan="4" class="table-placeholder">Carregando produtos…</td></tr></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel add-product-panel">
+              <div class="form-symbol"><svg><use href="#i-plus"/></svg></div>
+              <h3>Novo produto</h3>
+              <p>Adicione um item ao catálogo compartilhado com o motor de ingestão.</p>
+              <form id="productForm">
+                <label for="productName">Nome do produto</label>
+                <input type="text" name="nome" id="productName" placeholder="Ex.: Teclado mecânico" maxlength="100" required>
+                <div class="form-row">
+                  <div><label for="productPrice">Preço (R$)</label><input type="number" name="preco" id="productPrice" placeholder="0,00" step="0.01" min="0" required></div>
+                  <div><label for="productStock">Estoque inicial</label><input type="number" name="estoque" id="productStock" value="10000" min="0" step="1" required></div>
+                </div>
+                <button type="submit" class="button button-primary" id="submitProduct"><svg><use href="#i-plus"/></svg> Adicionar produto</button>
+              </form>
+              <span class="form-caption">Operação enviada ao endpoint <code>POST /produtos</code></span>
+            </article>
+          </div>
+        </section>
 
-            data: {
-                labels: [],
-
-                datasets: [{
-                    label: 'Unidades Vendidas',
-                    data: [],
-                    backgroundColor: '#820AD1',
-                    borderColor: '#A855F7',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }]
-            },
-
-            options: {
-                responsive: true,
-
-                animation: {
-                    duration: 300
-                },
-
-                scales: {
-                    y: {
-                        beginAtZero: true,
-
-                        grid: {
-                            color: '#27272a'
-                        },
-
-                        ticks: {
-                            color: '#a1a1aa'
-                        }
-                    },
-
-                    x: {
-                        grid: {
-                            display: false
-                        },
-
-                        ticks: {
-                            color: '#a1a1aa'
-                        }
-                    }
-                },
-
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#f4f4f5'
-                        }
-                    }
-                }
-            }
-        });
-
-        async function atualizarDashboard() {
-            try {
-                const [resDash, resGo] = await Promise.all([
-                    fetch(`${PHP_API}/dashboard`)
-                        .then(r => r.json()),
-
-                    fetch(`${GO_API}/stats`)
-                        .then(r => r.json())
-                ]);
-
-                document.getElementById('totalVendas').innerText =
-                    resDash.resumo.total_vendas;
-
-                document.getElementById('receitaTotal').innerText =
-                    Number(resDash.resumo.receita_total)
-                        .toLocaleString('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                        });
-
-                document.getElementById('goStats').innerText =
-                    `${resGo.sucesso} / ${resGo.erros}`;
-
-                chart.data.labels = resDash.por_produto
-                    .map(produto => produto.nome);
-
-                chart.data.datasets[0].data = resDash.por_produto
-                    .map(produto => produto.total_qtd);
-
-                chart.update();
-            } catch (erro) {
-                console.error(
-                    'Erro ao atualizar métricas:',
-                    erro
-                );
-            }
-        }
-
-        async function carregarProdutos() {
-            const produtos = await fetch(`${PHP_API}/produtos`)
-                .then(r => r.json());
-
-            const tbody = document.getElementById('listaProdutos');
-            const fragmento = document.createDocumentFragment();
-
-            for (const produto of produtos) {
-                const linha = document.createElement('tr');
-
-                for (const valor of [
-                    `#${produto.id}`,
-                    produto.nome,
-                    produto.estoque
-                ]) {
-                    const celula = document.createElement('td');
-
-                    celula.textContent = String(valor);
-                    linha.appendChild(celula);
-                }
-
-                const acao = document.createElement('td');
-                const botao = document.createElement('button');
-
-                botao.type = 'button';
-                botao.className = 'btn-del';
-                botao.textContent = 'X';
-
-                botao.addEventListener('click', () => {
-                    deletarProduto(produto.id);
-                });
-
-                acao.appendChild(botao);
-                linha.appendChild(acao);
-                fragmento.appendChild(linha);
-            }
-
-            tbody.replaceChildren(fragmento);
-        }
-
-        document
-            .getElementById('formProduto')
-            .addEventListener('submit', async (evento) => {
-                evento.preventDefault();
-
-                await fetch(`${PHP_API}/produtos`, {
-                    method: 'POST',
-
-                    body: JSON.stringify({
-                        nome: document.getElementById('nome').value,
-
-                        preco: parseFloat(
-                            document.getElementById('preco').value
-                        ),
-
-                        estoque: parseInt(
-                            document.getElementById('estoque').value,
-                            10
-                        )
-                    })
-                });
-
-                evento.target.reset();
-
-                carregarProdutos();
-                atualizarDashboard();
-            });
-
-        async function deletarProduto(id) {
-            await fetch(`${PHP_API}/produtos/${id}`, {
-                method: 'DELETE'
-            });
-
-            carregarProdutos();
-        }
-
-        carregarProdutos();
-        atualizarDashboard();
-
-        setInterval(() => {
-            atualizarDashboard();
-            carregarProdutos();
-        }, 2000);
-    </script>
+        <footer class="page-footer"><span>distributed.systems / observability console</span><span>Go · PHP · SQLite WAL</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="deleteDialog" class="confirm-dialog" aria-labelledby="deleteTitle" aria-describedby="deleteDescription">
+    <div class="dialog-icon"><svg><use href="#i-trash"/></svg></div>
+    <h2 id="deleteTitle">Remover produto?</h2>
+    <p id="deleteDescription">Essa ação excluirá o produto do catálogo.</p>
+    <div class="dialog-actions"><button type="button" class="button button-ghost" id="cancelDelete">Cancelar</button><button type="button" class="button button-danger" id="confirmDelete">Remover produto</button></div>
+  </dialog>
 </body>
 </html>
