@@ -10,3 +10,11 @@ SetMaxOpenConns = limita o numero de conexoes simultaneas abertas pelo Go no ban
 
 transacao atomica, db.Begin, defer tx.rollback, tx.commit: Eles garantem a integridade dos dados sobre alta concorrencia.
 atomic.LoadUint64: para ler de forma segura sem (race condition)
+
+COMANDOS PARA RODAR O PROJETO
+cd backend-go
+go run .
+php -S localhost:8000 -t backend-php/public
+python3 -m http.server 5500 --directory frontend
+python3 stress-test/load_test.py
+todos em terminais diferentes
