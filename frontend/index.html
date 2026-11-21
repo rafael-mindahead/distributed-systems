@@ -126,7 +126,7 @@
 </div>
 
 <script>
-    const PHP_API = 'http://localhost:8000/api.php';
+    const PHP_API = 'http://localhost:8000';
     const GO_API  = 'http://localhost:8080/api/v1';
 
     const ctx = document.getElementById('vendasChart').getContext('2d');
@@ -157,7 +157,7 @@
     async function atualizarDashboard() {
         try {
             const [resDash, resGo] = await Promise.all([
-                fetch(`${PHP_API}?acao=dashboard`).then(r => r.json()),
+                fetch(`${PHP_API}/dashboard`).then(r => r.json()),
                 fetch(`${GO_API}/stats`).then(r => r.json())
             ]);
 
@@ -175,7 +175,7 @@
     }
 
     async function carregarProdutos() {
-        const produtos = await fetch(`${PHP_API}?acao=produtos`).then(r => r.json());
+        const produtos = await fetch(`${PHP_API}/produtos`).then(r => r.json());
         const tbody = document.getElementById('listaProdutos');
         tbody.innerHTML = produtos.map(p => `
             <tr>
@@ -189,7 +189,7 @@
 
     document.getElementById('formProduto').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await fetch(`${PHP_API}?acao=produtos`, {
+        await fetch(`${PHP_API}/produtos`, {
             method: 'POST',
             body: JSON.stringify({
                 nome: document.getElementById('nome').value,
@@ -203,7 +203,7 @@
     });
 
     async function deletarProduto(id) {
-        await fetch(`${PHP_API}?acao=deletar&id=${id}`, { method: 'DELETE' });
+        await fetch(`${PHP_API}/produtos/${id}`, { method: 'DELETE' });
         carregarProdutos();
     }
 

@@ -25,13 +25,13 @@ var (
 )
 
 func initDB() {
-	os.MKdirAll("../data", os.ModePerm)
+	os.MkdirAll("../data", os.ModePerm)
 	var err error
 	db, err = sql.Open("sqlite3", "../data/sistema.db?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL")
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.SetMaxConns(10)
+	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(5)
 	schema := `
 	CREATE TABLE IF NOT EXISTS produtos (

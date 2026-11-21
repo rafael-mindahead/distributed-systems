@@ -17,7 +17,7 @@ class Venda
         $sql = "
         SELECT
             p.nome,
-            COALESCE(SUM(v.quantidades), 0) AS total_qtd,
+            COALESCE(SUM(v.quantidade), 0) AS total_qtd,
             COALESCE(SUM(v.valor_total), 0 ) AS faturamento
         FROM produtos p
         LEFT JOIN vendas v ON p.id = v.produto_id
@@ -31,7 +31,7 @@ class Venda
         $sql = "
         SELECT 
             COUNT(*) AS total_vendas,
-            COALESCE(SUM(valor_total), 0) AS receita_total,
+            COALESCE(SUM(valor_total), 0) AS receita_total
         FROM vendas
         ";
         return $this->db->query($sql)->fetch();

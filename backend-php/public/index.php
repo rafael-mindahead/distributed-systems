@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Autoloader PSR-4 manual para o namespace App\
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
-    $baseDir = __DIR__ . '/../app/';
+    $baseDir = __DIR__ . '/../App/';
 
     if (strncmp($prefix, $class, strlen($prefix)) !== 0) {
         return;

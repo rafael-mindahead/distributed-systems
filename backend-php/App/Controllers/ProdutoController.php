@@ -14,7 +14,7 @@ class ProdutoController
     }
     public function index(): void
     {
-        $produtos = $this->produtosModel->listarTodos();
+        $produtos = $this->produtoModel->listarTodos();
         echo json_encode($produtos);
     }
     public function store(): void
