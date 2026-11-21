@@ -27,7 +27,10 @@ var (
 func initDB() {
 	os.MkdirAll("../data", os.ModePerm)
 	var err error
-	db, err = sql.Open("sqlite3", "../data/sistema.db?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL")
+	db, err = sql.Open(
+		"sqlite3",
+		"../data/sistema.db?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_txlock=immediate",
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,6 +86,16 @@ func registrarVendaHandler(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		atomic.AddUint64(&totalErros, 1)
 		http.Error(w, "JSON inválido", http.StatusBadRequest)
+		return
+	}
+	if req.ProdutoID <= 0 {
+		atomic.AddUint64(&totalErros, 1)
+		http.Error(w, "produto_id deve ser maior que zero", http.StatusBadRequest)
+		return
+	}
+	if req.Quantidade <= 0 {
+		atomic.AddUint64(&totalErros, 1)
+		http.Error(w, "quantidade deve ser maior que zero", http.StatusBadRequest)
 		return
 	}
 

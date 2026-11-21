@@ -2,8 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Monitor Distribuído | Go + PHP + SQLite</title>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body {
             background-color: #09090b;
@@ -12,6 +16,7 @@
             margin: 0;
             padding: 24px;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -20,6 +25,7 @@
             padding-bottom: 16px;
             margin-bottom: 24px;
         }
+
         .badge {
             background: #820AD1;
             padding: 6px 12px;
@@ -27,32 +33,50 @@
             font-weight: bold;
             font-size: 0.9rem;
         }
+
         .cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
+
         .card {
             background: #18181b;
             border: 1px solid #27272a;
             padding: 20px;
             border-radius: 10px;
         }
-        .card h3 { margin: 0 0 8px 0; font-size: 0.85rem; color: #a1a1aa; text-transform: uppercase; }
-        .card p { margin: 0; font-size: 1.8rem; font-weight: bold; color: #A855F7; }
+
+        .card h3 {
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            color: #a1a1aa;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #A855F7;
+        }
+
         .grid-main {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 24px;
         }
+
         .panel {
             background: #18181b;
             border: 1px solid #27272a;
             padding: 20px;
             border-radius: 10px;
         }
-        input, button {
+
+        input,
+        button {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -62,157 +86,323 @@
             color: white;
             box-sizing: border-box;
         }
+
         button {
             background: #820AD1;
             border: none;
             font-weight: bold;
             cursor: pointer;
         }
-        button:hover { background: #A855F7; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #27272a; }
-        .btn-del { background: #dc2626; padding: 4px 8px; width: auto; margin: 0; }
+
+        button:hover {
+            background: #A855F7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .btn-del {
+            background: #dc2626;
+            padding: 4px 8px;
+            width: auto;
+            margin: 0;
+        }
     </style>
 </head>
+
 <body>
+    <div class="header">
+        <div>
+            <h1 style="margin: 0;">
+                Monitor de Concorrência Distribuída
+            </h1>
 
-<div class="header">
-    <div>
-        <h1 style="margin:0;">Monitor de Concorrência Distribuída</h1>
-        <small style="color:#a1a1aa;">Ingestão: Go (:8080) | Gateway/CRUD: PHP (:8000) | Banco: SQLite WAL</small>
-    </div>
-    <span class="badge">● Atualização Real-Time (2s)</span>
-</div>
+            <small style="color: #a1a1aa;">
+                Ingestão: Go (:8080) |
+                Gateway/CRUD: PHP (:8000) |
+                Banco: SQLite WAL
+            </small>
+        </div>
 
-<div class="cards">
-    <div class="card">
-        <h3>Total de Vendas Processadas</h3>
-        <p id="totalVendas">0</p>
-    </div>
-    <div class="card">
-        <h3>Receita Acumulada</h3>
-        <p id="receitaTotal">R$ 0,00</p>
-    </div>
-    <div class="card">
-        <h3>Status Motor Go (OK / Falhas)</h3>
-        <p id="goStats">0 / 0</p>
-    </div>
-</div>
-
-<div class="grid-main">
-    <div class="panel">
-        <h3 style="margin-top:0;">Volume de Unidades Vendidas por Produto</h3>
-        <canvas id="vendasChart" height="140"></canvas>
+        <span class="badge">
+            ● Atualização Real-Time (2s)
+        </span>
     </div>
 
-    <div class="panel">
-        <h3 style="margin-top:0;">Cadastrar Produto (PHP CRUD)</h3>
-        <form id="formProduto">
-            <input type="text" id="nome" placeholder="Nome do Produto" required>
-            <input type="number" step="0.01" id="preco" placeholder="Preço (ex: 199.90)" required>
-            <input type="number" id="estoque" placeholder="Estoque Inicial" value="10000" required>
-            <button type="submit">Adicionar ao Catálogo</button>
-        </form>
+    <div class="cards">
+        <div class="card">
+            <h3>Total de Vendas Processadas</h3>
+            <p id="totalVendas">0</p>
+        </div>
 
-        <div style="max-height: 220px; overflow-y: auto;">
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Produto</th><th>Estoque</th><th>Ação</th></tr>
-                </thead>
-                <tbody id="listaProdutos"></tbody>
-            </table>
+        <div class="card">
+            <h3>Receita Acumulada</h3>
+            <p id="receitaTotal">R$ 0,00</p>
+        </div>
+
+        <div class="card">
+            <h3>Status Motor Go (OK / Falhas)</h3>
+            <p id="goStats">0 / 0</p>
         </div>
     </div>
-</div>
 
-<script>
-    const PHP_API = 'http://localhost:8000';
-    const GO_API  = 'http://localhost:8080/api/v1';
+    <div class="grid-main">
+        <div class="panel">
+            <h3 style="margin-top: 0;">
+                Volume de Unidades Vendidas por Produto
+            </h3>
 
-    const ctx = document.getElementById('vendasChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Unidades Vendidas',
-                data: [],
-                backgroundColor: '#820AD1',
-                borderColor: '#A855F7',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: { duration: 300 },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#27272a' }, ticks: { color: '#a1a1aa' } },
-                x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
+            <canvas id="vendasChart" height="140"></canvas>
+        </div>
+
+        <div class="panel">
+            <h3 style="margin-top: 0;">
+                Cadastrar Produto (PHP CRUD)
+            </h3>
+
+            <form id="formProduto">
+                <input
+                    type="text"
+                    id="nome"
+                    placeholder="Nome do Produto"
+                    required
+                >
+
+                <input
+                    type="number"
+                    step="0.01"
+                    id="preco"
+                    placeholder="Preço (ex: 199.90)"
+                    required
+                >
+
+                <input
+                    type="number"
+                    id="estoque"
+                    placeholder="Estoque Inicial"
+                    value="10000"
+                    required
+                >
+
+                <button type="submit">
+                    Adicionar ao Catálogo
+                </button>
+            </form>
+
+            <div style="max-height: 220px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Estoque</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="listaProdutos"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PHP_API = 'http://localhost:8000';
+        const GO_API = 'http://localhost:8080/api/v1';
+
+        const ctx = document
+            .getElementById('vendasChart')
+            .getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+
+            data: {
+                labels: [],
+
+                datasets: [{
+                    label: 'Unidades Vendidas',
+                    data: [],
+                    backgroundColor: '#820AD1',
+                    borderColor: '#A855F7',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
             },
-            plugins: { legend: { labels: { color: '#f4f4f5' } } }
-        }
-    });
 
-    async function atualizarDashboard() {
-        try {
-            const [resDash, resGo] = await Promise.all([
-                fetch(`${PHP_API}/dashboard`).then(r => r.json()),
-                fetch(`${GO_API}/stats`).then(r => r.json())
-            ]);
+            options: {
+                responsive: true,
 
-            document.getElementById('totalVendas').innerText = resDash.resumo.total_vendas;
-            document.getElementById('receitaTotal').innerText =
-                Number(resDash.resumo.receita_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('goStats').innerText = `${resGo.sucesso} / ${resGo.erros}`;
+                animation: {
+                    duration: 300
+                },
 
-            chart.data.labels = resDash.por_produto.map(p => p.nome);
-            chart.data.datasets[0].data = resDash.por_produto.map(p => p.total_qtd);
-            chart.update();
-        } catch (e) {
-            console.error("Erro ao atualizar métricas:", e);
-        }
-    }
+                scales: {
+                    y: {
+                        beginAtZero: true,
 
-    async function carregarProdutos() {
-        const produtos = await fetch(`${PHP_API}/produtos`).then(r => r.json());
-        const tbody = document.getElementById('listaProdutos');
-        tbody.innerHTML = produtos.map(p => `
-            <tr>
-                <td>#${p.id}</td>
-                <td>${p.nome}</td>
-                <td>${p.estoque}</td>
-                <td><button class="btn-del" onclick="deletarProduto(${p.id})">X</button></td>
-            </tr>
-        `).join('');
-    }
+                        grid: {
+                            color: '#27272a'
+                        },
 
-    document.getElementById('formProduto').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await fetch(`${PHP_API}/produtos`, {
-            method: 'POST',
-            body: JSON.stringify({
-                nome: document.getElementById('nome').value,
-                preco: parseFloat(document.getElementById('preco').value),
-                estoque: parseInt(document.getElementById('estoque').value)
-            })
+                        ticks: {
+                            color: '#a1a1aa'
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            color: '#a1a1aa'
+                        }
+                    }
+                },
+
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#f4f4f5'
+                        }
+                    }
+                }
+            }
         });
-        e.target.reset();
+
+        async function atualizarDashboard() {
+            try {
+                const [resDash, resGo] = await Promise.all([
+                    fetch(`${PHP_API}/dashboard`)
+                        .then(r => r.json()),
+
+                    fetch(`${GO_API}/stats`)
+                        .then(r => r.json())
+                ]);
+
+                document.getElementById('totalVendas').innerText =
+                    resDash.resumo.total_vendas;
+
+                document.getElementById('receitaTotal').innerText =
+                    Number(resDash.resumo.receita_total)
+                        .toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                        });
+
+                document.getElementById('goStats').innerText =
+                    `${resGo.sucesso} / ${resGo.erros}`;
+
+                chart.data.labels = resDash.por_produto
+                    .map(produto => produto.nome);
+
+                chart.data.datasets[0].data = resDash.por_produto
+                    .map(produto => produto.total_qtd);
+
+                chart.update();
+            } catch (erro) {
+                console.error(
+                    'Erro ao atualizar métricas:',
+                    erro
+                );
+            }
+        }
+
+        async function carregarProdutos() {
+            const produtos = await fetch(`${PHP_API}/produtos`)
+                .then(r => r.json());
+
+            const tbody = document.getElementById('listaProdutos');
+            const fragmento = document.createDocumentFragment();
+
+            for (const produto of produtos) {
+                const linha = document.createElement('tr');
+
+                for (const valor of [
+                    `#${produto.id}`,
+                    produto.nome,
+                    produto.estoque
+                ]) {
+                    const celula = document.createElement('td');
+
+                    celula.textContent = String(valor);
+                    linha.appendChild(celula);
+                }
+
+                const acao = document.createElement('td');
+                const botao = document.createElement('button');
+
+                botao.type = 'button';
+                botao.className = 'btn-del';
+                botao.textContent = 'X';
+
+                botao.addEventListener('click', () => {
+                    deletarProduto(produto.id);
+                });
+
+                acao.appendChild(botao);
+                linha.appendChild(acao);
+                fragmento.appendChild(linha);
+            }
+
+            tbody.replaceChildren(fragmento);
+        }
+
+        document
+            .getElementById('formProduto')
+            .addEventListener('submit', async (evento) => {
+                evento.preventDefault();
+
+                await fetch(`${PHP_API}/produtos`, {
+                    method: 'POST',
+
+                    body: JSON.stringify({
+                        nome: document.getElementById('nome').value,
+
+                        preco: parseFloat(
+                            document.getElementById('preco').value
+                        ),
+
+                        estoque: parseInt(
+                            document.getElementById('estoque').value,
+                            10
+                        )
+                    })
+                });
+
+                evento.target.reset();
+
+                carregarProdutos();
+                atualizarDashboard();
+            });
+
+        async function deletarProduto(id) {
+            await fetch(`${PHP_API}/produtos/${id}`, {
+                method: 'DELETE'
+            });
+
+            carregarProdutos();
+        }
+
         carregarProdutos();
         atualizarDashboard();
-    });
 
-    async function deletarProduto(id) {
-        await fetch(`${PHP_API}/produtos/${id}`, { method: 'DELETE' });
-        carregarProdutos();
-    }
-
-    carregarProdutos();
-    atualizarDashboard();
-    setInterval(() => {
-        atualizarDashboard();
-        carregarProdutos();
-    }, 2000);
-</script>
+        setInterval(() => {
+            atualizarDashboard();
+            carregarProdutos();
+        }, 2000);
+    </script>
 </body>
 </html>
